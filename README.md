@@ -9,7 +9,7 @@ AI 에이전트를 기획·설계·구현하려는 사용자와 인터랙티브 
 Claude Code에서 한 줄로 설치:
 
 ```bash
-/plugin marketplace add ventusion/ai-agent-architect
+/plugin marketplace add tenacl/ai-agent-architect
 /plugin install ai-agent-architect
 ```
 
