@@ -1,6 +1,6 @@
 ---
 name: ai-agent-architect
-description: AI 에이전트를 기획·설계·구현하려는 사용자와 ask_user_input_v0 도구로 인터랙티브 11단계 대화를 진행해서 시스템 프롬프트·아키텍처 명세서·코드 스켈레톤을 자동 생성하는 스킬. 엔터프라이즈 루프 8단계, 토폴로지 8종, MSA vs Unified Cognition 철학, 6대 핵심 경쟁력 프레임 기반. **반드시 트리거되어야 하는 상황**: "에이전트 만들어줘", "에이전트 기획", "에이전트 설계", "에이전트 아키텍처", "에이전트 워크시트", "agent 만들어줘", "agent design", "워크시트 채워줘", "에이전트 짜줘", "챗봇 만들고 싶어", "AI 도우미 만들어줘" 등 AI 에이전트/챗봇/자동화 시스템 만들기 관련 모든 요청. **기본 동작은 워크시트 파일 생성이 아니라 ask_user_input_v0 도구를 이용한 인터랙티브 11단계 대화 진행이다.** 사용자가 명시적으로 "빈 양식만 줘"라고 한 경우에만 양식을 제공하고, 그 외 모든 경우 STEP 1부터 맥락 brief + 선택지 버튼으로 즉시 진행을 시작한다.
+description: AI 에이전트를 기획·설계·구현하려는 사용자와 ask_user_input_v0 도구로 인터랙티브 12단계 대화를 진행해서 시스템 프롬프트·아키텍처 명세서·코드 스켈레톤을 자동 생성하는 스킬. 엔터프라이즈 루프 8단계, 토폴로지 8종, MSA vs Unified Cognition 철학, 6대 핵심 경쟁력 프레임 기반. **반드시 트리거되어야 하는 상황**: "에이전트 만들어줘", "에이전트 기획", "에이전트 설계", "에이전트 아키텍처", "에이전트 워크시트", "agent 만들어줘", "agent design", "워크시트 채워줘", "에이전트 짜줘", "챗봇 만들고 싶어", "AI 도우미 만들어줘" 등 AI 에이전트/챗봇/자동화 시스템 만들기 관련 모든 요청. **기본 동작은 워크시트 파일 생성이 아니라 ask_user_input_v0 도구를 이용한 인터랙티브 11단계 대화 진행이다.** 사용자가 명시적으로 "빈 양식만 줘"라고 한 경우에만 양식을 제공하고, 그 외 모든 경우 STEP 1부터 맥락 brief + 선택지 버튼으로 즉시 진행을 시작한다.
 ---
 
 # AI Agent Architect — 인터랙티브 에이전트 설계 진행
@@ -43,7 +43,7 @@ description: AI 에이전트를 기획·설계·구현하려는 사용자와 ask
 
 예시 톤 (그대로 쓰지 말고 비슷한 톤으로):
 ```
-AI 에이전트 설계를 11단계로 함께 진행하겠습니다. 각 단계마다 짧은 맥락 설명 후 선택지를 제시하니 탭으로 답해주시면 됩니다. 모두 끝나면 시스템 프롬프트·아키텍처 명세서·코드 스켈레톤을 자동 생성합니다.
+AI 에이전트 설계를 12단계로 함께 진행하겠습니다. 각 단계마다 짧은 맥락 설명 후 선택지를 제시하니 탭으로 답해주시면 됩니다. 모두 끝나면 시스템 프롬프트·아키텍처 명세서·코드 스켈레톤을 자동 생성합니다.
 ```
 
 **(2) STEP 1 맥락 brief (3~4줄)**
@@ -184,6 +184,8 @@ AI 에이전트 설계를 11단계로 함께 진행하겠습니다. 각 단계�
 ## STEP 2 — 에이전트의 작동 루프 8단계
 
 에이전트는 단발 응답이 아니라 루프로 작동합니다. 기본 GRAM 루프(Goal·Reasoning·Action·Memory)를 엔터프라이즈용으로 확장하면 8단계가 됩니다. 그중 **5번(Evaluator: 결과 검증)·7번(Policy/Governance: 권한·감사)이 비어 있으면 운영 환경 금지**가 업계 컨센서스입니다 — 사고는 항상 여기서 납니다.
+
+(런타임이 Claude Code Native라면 8단계 매핑은 STEP 9 이후 산출물 생성 시 자동 적용. Claude 내부 참조: `references/claude-code-native-mapping.md`)
 ```
 
 ### 8단계를 묶어서 `ask_user_input_v0`로 — 각 단계 구현 방식 선택
@@ -593,7 +595,85 @@ PASS/FAIL을 판정하는 구체적 기준이 있다면 한 줄로 (예: "응답
 
 ---
 
-## STEP 9. 도구 · 인터페이스 · UI
+## STEP 9. 런타임 선택
+
+### 맥락 brief
+```
+## STEP 9 — 어디서 굴릴 것인가 (런타임)
+
+같은 에이전트라도 어디서 굴리느냐에 따라 산출물이 완전히 달라집니다.
+· **Claude Code Native** — Skill·Subagent·Hook·MCP·Slash Command 조합. 추론 루프·도구 호출·메모리·승인 UI(Plan Mode)·인터랙티브 입력(AskUserQuestion)이 이미 내장. 파일 몇 개로 끝.
+· **Python SDK 직접** — Anthropic SDK + 자체 while loop. 인프라·배포·UI 모두 자체 책임.
+· **Framework (CrewAI / LangGraph / AutoGen)** — 멀티 에이전트 추상화 제공. 학습 곡선·종속성 있음.
+
+이 선택이 산출물 4번(코드 스켈레톤)의 형태를 결정합니다. 같은 8단계 루프라도 Native는 파일 5개로, SDK는 코드 수백 줄로 구현됩니다.
+```
+
+### `ask_user_input_v0` — 런타임
+```json
+{
+  "questions": [{
+    "question": "어디서 굴릴 건가요?",
+    "type": "single_select",
+    "options": [
+      "Claude Code Native (권장 — 빠름·내장 UI)",
+      "Python SDK 직접 (Anthropic SDK)",
+      "Framework — CrewAI",
+      "Framework — LangGraph",
+      "Framework — AutoGen / 기타",
+      "아직 미정"
+    ]
+  }]
+}
+```
+
+### 분기 1: Claude Code Native 선택 시 — 구성요소 선택
+
+```json
+{
+  "questions": [{
+    "question": "어떤 구성요소를 쓰나요? (해당 모두)",
+    "type": "multi_select",
+    "options": [
+      "SKILL.md — 스킬화 (특정 키워드로 트리거)",
+      ".claude/agents/*.md — 서브에이전트 (컨텍스트 격리·전문 역할)",
+      ".claude/commands/*.md — 슬래시 커맨드 (/<name> 진입)",
+      "settings.json hooks — 거버넌스·감사 (PreToolUse·PostToolUse)",
+      "MCP 서버 — 외부 시스템 연결",
+      "CLAUDE.md — 프로젝트 행동 규칙"
+    ]
+  }]
+}
+```
+
+매핑 가이드: STEP 2의 8단계 루프 → Native 구성요소 매핑은 `references/claude-code-native-mapping.md` 참조 (Claude 내부용, 사용자에게 노출 금지).
+
+### 분기 2: Python SDK 선택 시
+추가 질문 없이 다음 STEP 진행. 산출물 4번은 `claude-tool-use-skeleton.py`로 생성.
+
+### 분기 3: Framework 선택 시 — 멀티 에이전트 구조 확인
+```json
+{
+  "questions": [{
+    "question": "에이전트 개수는?",
+    "type": "single_select",
+    "options": [
+      "단일 (코어 1개 + 도구)",
+      "2~3개 (위임 구조)",
+      "4개 이상 (복합 협업)"
+    ]
+  }]
+}
+```
+
+CrewAI / LangGraph / AutoGen 중 선택한 것에 해당하는 스켈레톤으로 산출물 4번 생성.
+
+### 분기 4: "아직 미정" 선택 시
+산출물 4번을 Native 폴더 + 파이썬 스켈레톤 3종 모두 폴더로 묶어 제공 (사용자 비교용).
+
+---
+
+## STEP 10. 도구 · 인터페이스 · UI
 
 ### 맥락 brief
 ```
@@ -633,7 +713,7 @@ MCP(Model Context Protocol)는 도구·에이전트 인터페이스 표준 후�
     {
       "question": "도구 인터페이스 표준은?",
       "type": "single_select",
-      "options": ["MCP (권장)", "OpenAPI / Function Calling", "자체 함수", "미정"]
+      "options": ["기본 제공 도구 (Bash·Read·Write·Grep) — Claude Code Native 디폴트", "MCP — 외부 시스템 연결 표준 (Claude Code Native 추천)", "OpenAPI / Function Calling", "자체 함수", "미정"]
     },
     {
       "question": "UI 진입점은? (해당 모두)",
@@ -651,7 +731,7 @@ MCP(Model Context Protocol)는 도구·에이전트 인터페이스 표준 후�
 
 ---
 
-## STEP 10. 6대 핵심 경쟁력 자가진단
+## STEP 11. 6대 핵심 경쟁력 자가진단
 
 ### 맥락 brief
 ```
@@ -694,7 +774,7 @@ MCP(Model Context Protocol)는 도구·에이전트 인터페이스 표준 후�
 
 ---
 
-## STEP 11. 산업 사이클 위치
+## STEP 12. 산업 사이클 위치
 
 ### 맥락 brief
 ```
@@ -721,11 +801,11 @@ MCP(Model Context Protocol)는 도구·에이전트 인터페이스 표준 후�
 
 ---
 
-## 🏁 STEP 11 끝난 후 — 산출물 자동 생성
+## 🏁 STEP 12 끝난 후 — 산출물 자동 생성
 
-모든 답변을 종합해서 4가지를 한 번에 만들어 `/mnt/user-data/outputs/`에 저장 → `present_files`로 공유:
+모든 답변을 종합해서 산출물을 만들어 `/mnt/user-data/outputs/`에 저장 → `present_files`로 공유:
 
-### 산출물 4종
+### 공통 산출물 3종 (런타임 무관)
 
 1. **`<프로젝트명>-worksheet.docx`** — 사용자 답변으로 빈칸이 채워진 워크시트.
    - `assets/worksheet-template.docx` 디자인 그대로 사용 (docx-js로 빌드)
@@ -735,12 +815,34 @@ MCP(Model Context Protocol)는 도구·에이전트 인터페이스 표준 후�
 
 3. **`<프로젝트명>-architecture-spec.md`** — `assets/architecture-spec-template.md` 패턴. 토폴로지에 맞는 Mermaid 다이어그램 포함.
 
-4. **`<프로젝트명>-skeleton.py`** — STEP 3 철학 선택에 따라 매칭:
-   - Unified → `assets/code-skeletons/claude-tool-use-skeleton.py`
-   - MSA (Hierarchical) → `assets/code-skeletons/crewai-skeleton.py`
-   - Hybrid → `assets/code-skeletons/langgraph-skeleton.py`
+### 산출물 4번 — STEP 9 런타임 선택에 따라 분기
 
-   스켈레톤의 `{{...}}` 자리표시자를 사용자 답변으로 실제 치환 (시스템 프롬프트 인라인, 도구 목록, 메모리 스키마, Evaluator/Replanner 본문, Governance 화이트/블랙리스트).
+| 런타임 (STEP 9) | 산출물 4번 |
+| :---- | :---- |
+| **Claude Code Native** | `<프로젝트명>-claude-code/` 폴더 (아래 4-A 참조) |
+| **Python SDK** | `<프로젝트명>-skeleton.py` ← `assets/code-skeletons/claude-tool-use-skeleton.py` |
+| **Framework — CrewAI** | `<프로젝트명>-skeleton.py` ← `assets/code-skeletons/crewai-skeleton.py` |
+| **Framework — LangGraph** | `<프로젝트명>-skeleton.py` ← `assets/code-skeletons/langgraph-skeleton.py` |
+| **Framework — AutoGen / 기타** | LangGraph 스켈레톤 기반 + 헤더 주석으로 변환 가이드 |
+| **아직 미정** | Native 폴더 + 파이썬 스켈레톤 3종 모두 묶어 제공 (사용자 비교용) |
+
+스켈레톤의 `{{...}}` 자리표시자를 사용자 답변으로 실제 치환 (시스템 프롬프트 인라인, 도구 목록, 메모리 스키마, Evaluator/Replanner 본문, Governance 화이트/블랙리스트).
+
+#### 4-A. Claude Code Native 폴더 구성
+
+STEP 9 분기 1에서 선택한 구성요소만 포함:
+
+| 선택 | 생성 파일 | 템플릿 |
+| :---- | :---- | :---- |
+| SKILL.md | `<프로젝트명>-claude-code/SKILL.md` | `assets/code-skeletons/claude-code-native/SKILL-template.md` |
+| 서브에이전트 | `<프로젝트명>-claude-code/agents/<role>.md` (역할당 1개) | `assets/code-skeletons/claude-code-native/subagent-template.md` |
+| 슬래시 커맨드 | `<프로젝트명>-claude-code/commands/<name>.md` | `assets/code-skeletons/claude-code-native/slash-command-template.md` |
+| hooks | `<프로젝트명>-claude-code/settings.json` | `assets/code-skeletons/claude-code-native/settings-hooks-snippet.json` |
+| CLAUDE.md | `<프로젝트명>-claude-code/CLAUDE.md` | `assets/code-skeletons/claude-code-native/CLAUDE-md-template.md` |
+
+매핑 규칙(8단계 루프 ↔ Skill·Subagent·Hook·MCP)은 `references/claude-code-native-mapping.md` 참조 (Claude 내부용).
+
+폴더 끝에 한 줄 설치 안내 포함: "이 폴더를 `~/.claude/` (사용자 전역) 또는 프로젝트 `.claude/`에 복사 후 Claude Code를 재시작하세요."
 
 ### 마지막 — 운영 환경 투입 체크
 
@@ -748,7 +850,8 @@ MCP(Model Context Protocol)는 도구·에이전트 인터페이스 표준 후�
 🚦 운영 환경 투입 체크
 ☑/☐ Evaluator 정의됨 — STEP 2 #5
 ☑/☐ Governance 정의됨 — STEP 2 #7
-☑/☐ 6대 경쟁력 3개 이상 답함 — STEP 10 (N/6)
+☑/☐ 런타임 의도적 선택 — STEP 9
+☑/☐ 6대 경쟁력 3개 이상 답함 — STEP 11 (N/6)
 ☑/☐ 토폴로지·철학 의도적 선택 — STEP 3·4
 
 → 모두 ☑: ✅ 운영 환경 투입 가능
@@ -769,7 +872,7 @@ MCP(Model Context Protocol)는 도구·에이전트 인터페이스 표준 후�
 → 그 STEP만 다시 진행. 이후 STEP은 기존 답변 유지.
 
 ### STEP 1에서 챗봇 충분 판정
-→ STEP 2~8 건너뛰기 옵션을 `ask_user_input_v0`로 제시.
+→ 챗봇이라도 STEP 9(런타임)·10(도구·UI)는 진행. 나머지(STEP 2~8, 11·12) 건너뛰기 옵션을 `ask_user_input_v0`로 제시.
 
 ---
 
@@ -792,6 +895,7 @@ MCP(Model Context Protocol)는 도구·에이전트 인터페이스 표준 후�
 - 토폴로지 선택이 헷갈리면 → `references/topology-guide.md`
 - 8단계 루프 코드 구현 → `references/loop-patterns.md`
 - 화이트/블랙리스트 구체화 → `references/governance-checklist.md`
+- Claude Code Native 런타임 매핑 (STEP 2 8단계 ↔ Skill·Subagent·Hook·MCP, STEP 10 6대 경쟁력 ↔ Native 기능) → `references/claude-code-native-mapping.md`
 
 사용자에게 그대로 보여주지 말고, 읽은 뒤 안내·질문에 녹여서 쓴다.
 
