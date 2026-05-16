@@ -1,0 +1,10 @@
+{
+  "name": "ai-agent-architect",
+  "version": "1.0.0",
+  "description": "AI 에이전트 인터랙티브 11단계 설계 워크시트 — 시스템 프롬프트·아키텍처 명세서·코드 스켈레톤 자동 생성",
+  "author": {
+    "name": "ventusion"
+  },
+  "homepage": "https://github.com/ventusion/ai-agent-architect",
+  "skills": ["./"]
+}
