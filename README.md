@@ -19,6 +19,16 @@ Claude Code에서 한 줄로 설치:
 /plugin update ai-agent-architect
 ```
 
+### 설치 시 SSH 인증 에러가 나는 경우
+
+`Permission denied (publickey)` / `SSH authentication failed` 메시지가 보이면 git이 GitHub를 SSH로 받으려고 하는데 SSH 키가 없는 상태입니다. PowerShell(또는 터미널)에서 한 번만 실행하면 이후 모든 GitHub 연결이 자동으로 HTTPS로 처리됩니다:
+
+```bash
+git config --global url."https://github.com/".insteadOf git@github.com:
+```
+
+그 다음 다시 install 명령어를 실행하세요.
+
 ## 사용법
 
 설치 후 Claude Code에서 다음과 같이 트리거하면 됩니다:
